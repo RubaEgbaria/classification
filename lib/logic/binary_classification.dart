@@ -30,10 +30,11 @@ String getDecisionBoundaryEquation(List<double> weights, int threshold) {
   final isNegative = yIntercept < 0;
   final sign = isNegative ? "-" : "+";
 
-  return "${slope.toStringAsFixed(2)}X $sign${(yIntercept).abs().toStringAsFixed(2)}";
+// 2.0 * X + 3.0
+  return "${slope.toStringAsFixed(2)} * X $sign ${(yIntercept).abs().toStringAsFixed(2)}";
 }
 
-void testSampleData() {
+String testSampleData() {
   final x1 = [0.1, 0.2, 0.3, 0.4]; // input
   final x2 = [0.2, 0.3, 0.4, 0.5]; // input
   final List<double> yDesired = [0.2, 1.2, 0.1, 1.2]; // input
@@ -44,8 +45,8 @@ void testSampleData() {
   const maxNumberOfIterations = 3; // input
   const learningRate = 0.1; // input
 
-  double accuracy = 0; // output
-  double performance = 0; // output
+  // double accuracy = 0; // output
+  // double performance = 0; // output
 
   List<List<double>> updatedWeights =
       List.filled(x1.length, List.filled(x1.length, 0.0)); // output
@@ -69,4 +70,5 @@ void testSampleData() {
     final equation = getDecisionBoundaryEquation(weights, threshold);
     print("Decision Boundary Equation: $equation");
   }
+  return getDecisionBoundaryEquation(weights, threshold);
 }
