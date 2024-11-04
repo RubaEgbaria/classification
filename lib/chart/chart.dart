@@ -6,12 +6,16 @@ class LineChartSample extends StatelessWidget {
   final String eq;
   final List<double>? xValues;
   final List<double>? yValues;
+  final List<int>? yDesired;
+  final int? classId;
 
   LineChartSample({
     super.key,
     required this.eq,
     this.xValues,
     this.yValues,
+    this.yDesired,
+    this.classId,
   }) {
     minSpotX = xValues != null ? xValues!.reduce((a, b) => a < b ? a : b) : 0;
     maxSpotX = xValues != null ? xValues!.reduce((a, b) => a > b ? a : b) : 0;
@@ -71,13 +75,24 @@ class LineChartSample extends StatelessWidget {
     return List.generate(
         xValues.length, (index) => FlSpot(xValues[index], yValues[index]));
   }
+  // spots that belong to current class (classID)
+
+  List<FlSpot> generateCurrentClassSpot() {
+    List<FlSpot> spots = [];
+    for (int i = 0; i < xValues!.length; i++) {
+      if (yDesired![i] == classId) {
+        spots.add(FlSpot(xValues![i], yValues![i]));
+      }
+    }
+    return spots;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: AspectRatio(
-        aspectRatio: 1.2,
+        aspectRatio: 3,
         child: LineChart(
           LineChartData(
             lineBarsData: [
@@ -92,6 +107,11 @@ class LineChartSample extends StatelessWidget {
                 gradient: const LinearGradient(
                     colors: [Colors.blueGrey, Colors.lightBlueAccent]),
                 spots: spots,
+              ),
+              LineChartBarData(
+                spots: generateCurrentClassSpot(),
+                color: Colors.purpleAccent,
+                barWidth: 0,
               ),
             ],
             minY: minSpotY,

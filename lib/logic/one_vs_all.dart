@@ -73,6 +73,7 @@ List<double> logisticRegression(List<double> x1, List<double> x2,
         weights[1] += learningRate * error * x2[i];
       }
     }
+    print('Iteration: $j, Weights: $weights');
   }
 
   return weights;
@@ -116,5 +117,62 @@ Map<String, dynamic> testBinaryClassification(List<double> x1, List<double> x2,
   results["sse"] = sse;
   results["accuracy"] = accuracy;
 
+  return results;
+}
+
+List<Map<String, dynamic>> testMultiClassification(
+    List<double> x1,
+    List<double> x2,
+    List<int> yDesired,
+    int maxIterations,
+    double learningRate) {
+  int threshold = 1;
+
+  List<Map<String, dynamic>> results =
+      List.generate(yDesired.toSet().length, (index) => {});
+  List<int> tempYDesired = [];
+
+  for (int c = 0; c < yDesired.toSet().length; c++) {
+    // 3/4 num of classes
+    if (c == 0) {
+      tempYDesired = yDesired.map((e) => e == 0 ? 0 : 1).toList();
+    } else if (c == 1) {
+      tempYDesired = yDesired.map((e) => e == 1 ? 1 : 0).toList();
+    } else if (c == 2) {
+      tempYDesired = yDesired.map((e) => e == 2 ? 1 : 0).toList();
+    } else if (c == 3) {
+      tempYDesired = yDesired.map((e) => e == 3 ? 1 : 0).toList();
+    } else {
+      tempYDesired = yDesired;
+    }
+
+    // Train
+    final weights = logisticRegression(
+        x1, x2, tempYDesired, learningRate, maxIterations, threshold);
+
+    List<int> yPred = [];
+    for (int i = 0; i < x1.length; i++) {
+      final z = calculateZ(x1[i], x2[i], weights, threshold);
+      yPred.add(stepFunction(z));
+    }
+
+    final equation = getEquation(weights, threshold);
+
+    // Calculate confusion matrix and SSE
+    final confusion = confusionMatrix(tempYDesired, yPred);
+
+    // SSE
+    final sse = calculateSSE(tempYDesired, yPred);
+
+    // accuracy
+    final accuracy =
+        (confusion["True Positive"]! + confusion["True Negative"]!) /
+            tempYDesired.length;
+
+    results[c]["equation"] = equation;
+    results[c]["confusionMatrix"] = confusion;
+    results[c]["sse"] = sse;
+    results[c]["accuracy"] = accuracy;
+  }
   return results;
 }
