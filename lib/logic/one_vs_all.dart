@@ -133,17 +133,11 @@ List<Map<String, dynamic>> testMultiClassification(
   List<int> tempYDesired = [];
 
   for (int c = 0; c < yDesired.toSet().length; c++) {
-    // 3/4 num of classes
-    if (c == 0) {
-      tempYDesired = yDesired.map((e) => e == 0 ? 0 : 1).toList();
-    } else if (c == 1) {
-      tempYDesired = yDesired.map((e) => e == 1 ? 1 : 0).toList();
-    } else if (c == 2) {
-      tempYDesired = yDesired.map((e) => e == 2 ? 1 : 0).toList();
-    } else if (c == 3) {
-      tempYDesired = yDesired.map((e) => e == 3 ? 1 : 0).toList();
+    // 3 or 4 num of classes more is fine as well.
+    if (c != 0) {
+      tempYDesired = yDesired.map((e) => e == c ? 1 : 0).toList();
     } else {
-      tempYDesired = yDesired;
+      tempYDesired = yDesired.map((e) => e == c ? 0 : 1).toList();
     }
 
     // Train
