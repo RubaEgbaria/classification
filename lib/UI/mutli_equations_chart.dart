@@ -93,7 +93,7 @@ class MutliEquationsChart extends StatelessWidget {
                   spots: spots,
                   isCurved: true,
                   isStrokeJoinRound: true,
-                  color: CupertinoColors.secondaryLabel,
+                  color: CupertinoColors.activeBlue,
                   barWidth: 2,
                 ),
             ],

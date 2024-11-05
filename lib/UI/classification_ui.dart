@@ -20,14 +20,17 @@ class ClassificationUi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (multiClassResult.isEmpty && binaryResult.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return SingleChildScrollView(
       controller: ScrollController(),
-      child: multiClassResult.isNotEmpty
+      child: yDesired.toSet().length > 2
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text(
-                  'Multi-Class Classification using One vs All',
+                  '- - One vs All - -',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 for (int i = 0; i < multiClassResult.length; i++)
@@ -47,32 +50,46 @@ class ClassificationUi extends StatelessWidget {
                           yValues: x2,
                           yDesired: yDesired,
                           classId: i),
-                      DataTable(
-                        columns: const [
-                          DataColumn(label: Text('')),
-                          DataColumn(label: Text('')),
-                        ],
-                        rows: [
-                          DataRow(cells: [
-                            const DataCell(Text('Equation')),
-                            DataCell(
-                                Text('${multiClassResult[i]['equation']}')),
-                          ]),
-                          DataRow(cells: [
-                            const DataCell(Text('SSE')),
-                            DataCell(Text('${multiClassResult[i]['sse']}')),
-                          ]),
-                          DataRow(cells: [
-                            const DataCell(Text('Accuracy')),
-                            DataCell(Text(
-                                '${multiClassResult[i]['accuracy'].toStringAsFixed(2)}')),
-                          ]),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          DataTable(
+                            decoration: const BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: Colors.blueGrey,
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+                            columns: const [
+                              DataColumn(label: Text('Model')),
+                              DataColumn(label: Text('Result')),
+                            ],
+                            rows: [
+                              DataRow(cells: [
+                                const DataCell(Text('Equation')),
+                                DataCell(
+                                    Text('${multiClassResult[i]['equation']}')),
+                              ]),
+                              DataRow(cells: [
+                                const DataCell(Text('SSE')),
+                                DataCell(Text('${multiClassResult[i]['sse']}')),
+                              ]),
+                              DataRow(cells: [
+                                const DataCell(Text('Accuracy')),
+                                DataCell(Text(
+                                    '${multiClassResult[i]['accuracy'].toStringAsFixed(2)}')),
+                              ]),
+                            ],
+                          ),
+                          ConfusionMatrixUI(
+                              confusionMatrix: multiClassResult[i]
+                                  ['confusionMatrix']),
+                          const Divider(thickness: 1, color: Colors.blueGrey),
                         ],
                       ),
-                      ConfusionMatrixUI(
-                          confusionMatrix: multiClassResult[i]
-                              ['confusionMatrix']),
-                      const Divider(thickness: 1, color: Colors.blueGrey),
                     ],
                   ),
                 MutliEquationsChart(
@@ -96,30 +113,38 @@ class ClassificationUi extends StatelessWidget {
                   eq: binaryResult['equation'].toString(),
                   xValues: x1,
                   yValues: x2,
+                  yDesired: yDesired,
+                  classId: 0,
                 ),
-                DataTable(
-                  columns: const [
-                    DataColumn(label: Text('')),
-                    DataColumn(label: Text('')),
-                  ],
-                  rows: [
-                    DataRow(cells: [
-                      const DataCell(Text('Equation')),
-                      DataCell(Text('${binaryResult['equation']}')),
-                    ]),
-                    DataRow(cells: [
-                      const DataCell(Text('SSE')),
-                      DataCell(Text('${binaryResult['sse']}')),
-                    ]),
-                    DataRow(cells: [
-                      const DataCell(Text('Accuracy')),
-                      DataCell(Text(
-                          '${binaryResult['accuracy'].toStringAsFixed(2)}')),
-                    ]),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    DataTable(
+                      columns: const [
+                        DataColumn(label: Text('Model')),
+                        DataColumn(label: Text('Result')),
+                      ],
+                      rows: [
+                        DataRow(cells: [
+                          const DataCell(Text('Equation')),
+                          DataCell(Text('${binaryResult['equation']}')),
+                        ]),
+                        DataRow(cells: [
+                          const DataCell(Text('SSE')),
+                          DataCell(Text('${binaryResult['sse']}')),
+                        ]),
+                        DataRow(cells: [
+                          const DataCell(Text('Accuracy')),
+                          DataCell(Text(
+                              '${binaryResult['accuracy'].toStringAsFixed(2)}')),
+                        ]),
+                      ],
+                    ),
+                    ConfusionMatrixUI(
+                        confusionMatrix: binaryResult['confusionMatrix']),
                   ],
                 ),
-                ConfusionMatrixUI(
-                    confusionMatrix: binaryResult['confusionMatrix']),
               ],
             ),
     );
