@@ -92,7 +92,7 @@ class LineChartSample extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: AspectRatio(
-        aspectRatio: 3,
+        aspectRatio: 1.2,
         child: LineChart(
           LineChartData(
             lineBarsData: [

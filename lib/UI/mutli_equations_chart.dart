@@ -21,7 +21,7 @@ class MutliEquationsChart extends StatelessWidget {
     minSpotY = yValues != null ? yValues!.reduce((a, b) => a < b ? a : b) : 0;
     maxSpotY = yValues != null ? yValues!.reduce((a, b) => a > b ? a : b) : 0;
 
-    for (String eq in equations) {
+    for (final eq in equations) {
       final parsed = parseEquation(eq);
       if (parsed != null) {
         final w0 = parsed[0];
@@ -37,7 +37,7 @@ class MutliEquationsChart extends StatelessWidget {
   late double maxSpotX;
   late double minSpotY;
   late double maxSpotY;
-  final List<List<FlSpot>> equationSpots = []; // Store spots for each equation
+  final List<List<FlSpot>> equationSpots = [];
 
   List<double>? parseEquation(String equation) {
     // Example: "y = -0.01 * x + 0.5"
@@ -76,9 +76,9 @@ class MutliEquationsChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(10.0),
       child: AspectRatio(
-        aspectRatio: 3,
+        aspectRatio: 1.2,
         child: LineChart(
           LineChartData(
             lineBarsData: [
@@ -88,12 +88,10 @@ class MutliEquationsChart extends StatelessWidget {
                 barWidth: 0,
                 dotData: const FlDotData(show: true),
               ),
-              // Add each equation's spots as a separate line
               for (final spots in equationSpots)
                 LineChartBarData(
                   spots: spots,
                   isCurved: true,
-                  curveSmoothness: 0.6,
                   isStrokeJoinRound: true,
                   color: CupertinoColors.secondaryLabel,
                   barWidth: 2,
@@ -109,7 +107,7 @@ class MutliEquationsChart extends StatelessWidget {
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
-                  reservedSize: 40,
+                  reservedSize: 30,
                 ),
               ),
               topTitles: AxisTitles(

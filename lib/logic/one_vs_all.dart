@@ -73,7 +73,6 @@ List<double> logisticRegression(List<double> x1, List<double> x2,
         weights[1] += learningRate * error * x2[i];
       }
     }
-    print('Iteration: $j, Weights: $weights');
   }
 
   return weights;
