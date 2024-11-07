@@ -136,12 +136,13 @@ List<Map<String, dynamic>> testMultiClassification(
   int threshold = 1;
 
   List<Map<String, dynamic>> results =
-      List.generate(yDesired.toSet().length, (index) => {});
+      List.generate(yDesired.toSet().length + 1, (index) => {});
   List<int> tempYDesired = [];
 
   List<int> finalYPred = List<int>.filled(x1.length, -1);
+  final length = yDesired.toSet().length;
 
-  for (int c = 0; c < yDesired.toSet().length; c++) {
+  for (int c = 0; c < length; c++) {
     // 3 or 4 num of classes more is fine as well.
     if (c != 0) {
       tempYDesired = yDesired.map((e) => e == c ? 1 : 0).toList();
@@ -185,13 +186,24 @@ List<Map<String, dynamic>> testMultiClassification(
     results[c]["confusionMatrix"] = confusion;
     results[c]["sse"] = sse;
     results[c]["accuracy"] = accuracy;
-    results[c]["yPred"] = finalYPred;
+    results[c]["yPred"] = binaryYPed;
   }
+  results[length]["yPred"] = finalYPred;
+  results[length]["yDesired"] = yDesired;
+  results[length]["equation"] = results
+      .map((e) => e["equation"])
+      .where((e) => e != null)
+      .toList()
+      .join("\n");
+  results[length]["sse"] = calculateSSE(yDesired, finalYPred);
+  results[length]["confusionMatrix"] = confusionMatrix(yDesired, finalYPred);
+  results[length]["accuracy"] = (results[length]["confusionMatrix"]
+              ["True Positive"]! +
+          results[length]["confusionMatrix"]["True Negative"]!) /
+      yDesired.length;
+
   return results;
 }
 
-
-// add confusion matrix for multi class result
-// add SSE for multi class result
-// add accuracy for multi class result
 // allow user to add test data
+// check what is wrong with the 4th class

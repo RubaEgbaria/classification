@@ -84,15 +84,11 @@ class MutliEquationsChart extends StatelessWidget {
       );
     }
     yPredSpots = classSpotsMap;
-
-    print("yPredSpots: $yPredSpots");
   }
 
   @override
   Widget build(BuildContext context) {
     generateYpredSpots(xValues!, yValues!, yPred);
-
-    print("y pred: $yPred");
 
     final Map<int, Color> classColors = {
       1: Colors.purple,

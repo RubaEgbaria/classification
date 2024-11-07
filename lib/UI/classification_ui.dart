@@ -33,7 +33,7 @@ class ClassificationUi extends StatelessWidget {
                   '- - One vs All - -',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                for (int i = 0; i < multiClassResult.length; i++)
+                for (int i = 0; i < multiClassResult.length - 1; i++)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -55,14 +55,6 @@ class ClassificationUi extends StatelessWidget {
                         mainAxisSize: MainAxisSize.max,
                         children: [
                           DataTable(
-                            decoration: const BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: Colors.blueGrey,
-                                  width: 1,
-                                ),
-                              ),
-                            ),
                             columns: const [
                               DataColumn(label: Text('Model')),
                               DataColumn(label: Text('Result')),
@@ -92,23 +84,48 @@ class ClassificationUi extends StatelessWidget {
                       ),
                     ],
                   ),
+                const Divider(),
                 MutliEquationsChart(
-                  equations: multiClassResult
-                      .map((e) => e['equation'].toString())
-                      .toList(),
-                  xValues: x1,
-                  yValues: x2,
-                  yPred: multiClassResult
-                      .map((e) {
-                        return (e['yPred'] is List<int>)
-                            ? e['yPred'] as List<int>
-                            : (e['yPred'] as List<dynamic>)
-                                .map((item) =>
-                                    int.tryParse(item.toString()) ?? 0)
-                                .toList();
-                      })
-                      .expand((e) => e)
-                      .toList(),
+                    equations: multiClassResult
+                        .map((e) => e['equation'].toString())
+                        .toList(),
+                    xValues: x1,
+                    yValues: x2,
+                    yPred: multiClassResult[yDesired.toSet().length]['yPred']),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    DataTable(
+                      columns: const [
+                        DataColumn(label: Text('Model')),
+                        DataColumn(label: Text('Result')),
+                      ],
+                      rows: [
+                        DataRow(cells: [
+                          const DataCell(Text('Equation')),
+                          DataCell(Text(
+                            '${multiClassResult[yDesired.toSet().length]['equation']}',
+                            style: const TextStyle(fontSize: 10),
+                          )),
+                        ]),
+                        DataRow(cells: [
+                          const DataCell(Text('SSE')),
+                          DataCell(Text(
+                              '${multiClassResult[yDesired.toSet().length]['sse']}')),
+                        ]),
+                        DataRow(cells: [
+                          const DataCell(Text('Accuracy')),
+                          DataCell(Text(
+                              '${multiClassResult[yDesired.toSet().length]['accuracy'].toStringAsFixed(2)}')),
+                        ]),
+                      ],
+                    ),
+                    ConfusionMatrixUI(
+                        confusionMatrix:
+                            multiClassResult[yDesired.toSet().length]
+                                ['confusionMatrix']),
+                  ],
                 ),
               ],
             )

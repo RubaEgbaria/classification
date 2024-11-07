@@ -19,6 +19,7 @@ class MainApp extends StatelessWidget {
 
     return MaterialApp(
       darkTheme: ThemeData.dark(useMaterial3: true),
+      title: 'Classification App',
       home: const Scaffold(
         body: DataWidget(),
       ),
