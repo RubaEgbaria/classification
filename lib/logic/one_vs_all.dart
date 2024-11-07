@@ -1,8 +1,8 @@
 import 'dart:math';
 
 List<double> weights = [0.1, 0.1];
-const threshold = 1;
 List<List<double>> classWeights = [];
+const threshold = 1;
 
 double calculateZ(double x1, double x2, {List<double>? w}) {
   if (w != null) {
