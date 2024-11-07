@@ -56,6 +56,7 @@ Map<String, int> confusionMatrix(List<int> yDesired, List<int> yPredicted) {
 }
 
 double calculateSSE(List<int> yDesired, List<int> yActual) {
+  // Sum of Squared Errors = Σ(yDesired - yActual)^2
   return yDesired
       .asMap()
       .map((i, val) => MapEntry(i, pow(val - yActual[i], 2)))
@@ -83,43 +84,7 @@ List<double> logisticRegression(List<double> x1, List<double> x2,
   return weights;
 }
 
-int predictClass(double x1, double x2, {List<double>? w}) {
-  final z = calculateZ(x1, x2, w: w);
-  return stepFunction(z);
-}
-
-List<int> predictClassBinary(List<double> x1, List<double> x2, List<double> w) {
-  List<int> resultClass = List.filled(x1.length, -1);
-
-  for (int i = 0; i < x1.length; i++) {
-    resultClass[i] = predictClass(x1[i], x2[i], w: w);
-  }
-
-  return resultClass;
-}
-
-List<int> predictMultiClassData(List<double> x1, List<double> x2) {
-  final classNum = classWeights.length;
-  List<int> resultClass = List.filled(x1.length, -1);
-  List<int> tempResult = List.filled(x1.length, -1);
-  for (int c = 0; c < classNum; c++) {
-    tempResult = predictClassBinary(x1, x2, classWeights[c]);
-
-    if (c == 0) {
-      resultClass = tempResult;
-    }
-
-    for (int i = 0; i < x1.length; i++) {
-      if (tempResult[i] == 1) {
-        resultClass[i] = c;
-      }
-    }
-  }
-
-  return resultClass;
-}
-
-Map<String, dynamic> testBinaryClassification(List<double> x1, List<double> x2,
+Map<String, dynamic> trainBinaryClassification(List<double> x1, List<double> x2,
     List<int> yDesired, int maxIterations, double learningRate) {
   Map<String, dynamic> results = {};
 
@@ -152,7 +117,7 @@ Map<String, dynamic> testBinaryClassification(List<double> x1, List<double> x2,
   return results;
 }
 
-List<Map<String, dynamic>> testMultiClassification(
+List<Map<String, dynamic>> trainMultiClassification(
     List<double> x1,
     List<double> x2,
     List<int> yDesired,
@@ -178,6 +143,8 @@ List<Map<String, dynamic>> testMultiClassification(
     final currentWeight =
         logisticRegression(x1, x2, tempYDesired, learningRate, maxIterations);
 
+    weights = currentWeight;
+
     classWeights[c][0] = currentWeight[0];
     classWeights[c][1] = currentWeight[1];
 
@@ -190,7 +157,9 @@ List<Map<String, dynamic>> testMultiClassification(
       binaryYPed[i] = localYPred;
 
       if (i == 0 && c == 0) {
-        finalYPred = binaryYPed;
+        // save the zero
+        // as zero is the first class
+        finalYPred = binaryYPed.map((e) => e == 1 ? c : e).toList();
       } else if (c != 0) {
         finalYPred[i] = localYPred == 1 ? c : finalYPred[i];
       }
@@ -230,4 +199,41 @@ List<Map<String, dynamic>> testMultiClassification(
       yDesired.length;
 
   return results;
+}
+
+// Prediction
+int predictClass(double x1, double x2, {List<double>? w}) {
+  final z = calculateZ(x1, x2, w: w);
+  return stepFunction(z);
+}
+
+List<int> predictClassBinary(List<double> x1, List<double> x2, List<double> w) {
+  List<int> resultClass = List.filled(x1.length, -1);
+
+  for (int i = 0; i < x1.length; i++) {
+    resultClass[i] = predictClass(x1[i], x2[i], w: w);
+  }
+
+  return resultClass;
+}
+
+List<int> predictMultiClassData(List<double> x1, List<double> x2) {
+  final classNum = classWeights.length;
+  List<int> resultClass = List.filled(x1.length, -1);
+  List<int> tempResult = List.filled(x1.length, -1);
+  for (int c = 0; c < classNum; c++) {
+    tempResult = predictClassBinary(x1, x2, classWeights[c]);
+
+    if (c == 0) {
+      resultClass = tempResult;
+    }
+
+    for (int i = 0; i < x1.length; i++) {
+      if (tempResult[i] == 1) {
+        resultClass[i] = c;
+      }
+    }
+  }
+
+  return resultClass;
 }

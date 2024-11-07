@@ -92,7 +92,6 @@ class MutliEquationsChart extends StatelessWidget {
     generateYpredSpots(xValues!, yValues!, yPred);
 
     final Map<int, Color> classColors = {
-      0: Colors.lime,
       1: Colors.purple,
       2: Colors.orange,
       3: Colors.green,

@@ -138,10 +138,10 @@ class _DataWidgetState extends State<DataWidget> {
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  multiClassResult = testMultiClassification(
+                  multiClassResult = trainMultiClassification(
                       x1, x2, yDesired, maxIterations!, learningRate!);
 
-                  binaryClassResult = testBinaryClassification(
+                  binaryClassResult = trainBinaryClassification(
                       x1, x2, yDesired, maxIterations!, learningRate!);
                 });
               },
