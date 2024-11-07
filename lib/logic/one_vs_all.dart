@@ -1,23 +1,22 @@
 import 'dart:math';
 
-double calculateZ(double x1, double x2, List<double> weights, int threshold) {
+List<double> weights = [0.1, 0.1];
+const threshold = 1;
+List<List<double>> classWeights = [];
+
+double calculateZ(double x1, double x2, {List<double>? w}) {
+  if (w != null) {
+    return x1 * w[0] + x2 * w[1] + threshold;
+  }
   return x1 * weights[0] + x2 * weights[1] + threshold;
 }
 
 int stepFunction(double z) {
-  // tanh
-  // return (1 / (1 + exp(-z))) > 0.5 ? 1 : 0;
-  // sigmoid
-  // return (1 / (1 + exp(-z))) > 0.5 ? 1 : 0;
-  // ReLU
-  // return z >= 0 ? 1 : 0;
-  // softmax
-  // return z >= 0 ? 1 : 0;
   return z >= 0 ? 1 : 0;
 }
 
 // equation
-String getEquation(List<double> weights, int threshold) {
+String getEquation() {
   if (weights[1] == 0) {
     return "Vertical line at x = ${-threshold / weights[0]}";
   } else {
@@ -66,15 +65,13 @@ double calculateSSE(List<int> yDesired, List<int> yActual) {
 }
 
 List<double> logisticRegression(List<double> x1, List<double> x2,
-    List<int> yDesired, double learningRate, int maxIterations, int threshold) {
-  List<double> weights = [0.1, 0.1];
-
+    List<int>? yDesired, double learningRate, int maxIterations) {
   for (int j = 0; j < maxIterations; j++) {
     for (int i = 0; i < x1.length; i++) {
-      final z = calculateZ(x1[i], x2[i], weights, threshold);
+      final z = calculateZ(x1[i], x2[i], w: weights);
       final yPred = stepFunction(z);
 
-      final error = yDesired[i] - yPred;
+      final error = yDesired == null ? 0 : yDesired[i] - yPred;
 
       if (error != 0) {
         weights[0] += learningRate * error * x1[i];
@@ -86,28 +83,56 @@ List<double> logisticRegression(List<double> x1, List<double> x2,
   return weights;
 }
 
-int predictClass(double x1, double x2, List<double> weights, int threshold) {
-  final z = calculateZ(x1, x2, weights, threshold);
+int predictClass(double x1, double x2, {List<double>? w}) {
+  final z = calculateZ(x1, x2, w: w);
   return stepFunction(z);
+}
+
+List<int> predictClassBinary(List<double> x1, List<double> x2, List<double> w) {
+  List<int> resultClass = List.filled(x1.length, -1);
+
+  for (int i = 0; i < x1.length; i++) {
+    resultClass[i] = predictClass(x1[i], x2[i], w: w);
+  }
+
+  return resultClass;
+}
+
+List<int> predictMultiClassData(List<double> x1, List<double> x2) {
+  final classNum = classWeights.length;
+  List<int> resultClass = List.filled(x1.length, -1);
+  List<int> tempResult = List.filled(x1.length, -1);
+  for (int c = 0; c < classNum; c++) {
+    tempResult = predictClassBinary(x1, x2, classWeights[c]);
+
+    if (c == 0) {
+      resultClass = tempResult;
+    }
+
+    for (int i = 0; i < x1.length; i++) {
+      if (tempResult[i] == 1) {
+        resultClass[i] = c;
+      }
+    }
+  }
+
+  return resultClass;
 }
 
 Map<String, dynamic> testBinaryClassification(List<double> x1, List<double> x2,
     List<int> yDesired, int maxIterations, double learningRate) {
-  int threshold = 1;
-
   Map<String, dynamic> results = {};
 
   // Train
-  final weights = logisticRegression(
-      x1, x2, yDesired, learningRate, maxIterations, threshold);
+  weights = logisticRegression(x1, x2, yDesired, learningRate, maxIterations);
 
   List<int> yPred = [];
   for (int i = 0; i < x1.length; i++) {
-    final z = calculateZ(x1[i], x2[i], weights, threshold);
+    final z = calculateZ(x1[i], x2[i], w: weights);
     yPred.add(stepFunction(z));
   }
 
-  final equation = getEquation(weights, threshold);
+  final equation = getEquation();
 
   // Calculate confusion matrix and SSE
   final confusion = confusionMatrix(yDesired, yPred);
@@ -133,14 +158,13 @@ List<Map<String, dynamic>> testMultiClassification(
     List<int> yDesired,
     int maxIterations,
     double learningRate) {
-  int threshold = 1;
-
   List<Map<String, dynamic>> results =
       List.generate(yDesired.toSet().length + 1, (index) => {});
   List<int> tempYDesired = [];
 
   List<int> finalYPred = List<int>.filled(x1.length, -1);
   final length = yDesired.toSet().length;
+  classWeights = List.generate(yDesired.toSet().length, (_) => [0.0, 0.0]);
 
   for (int c = 0; c < length; c++) {
     // 3 or 4 num of classes more is fine as well.
@@ -151,12 +175,15 @@ List<Map<String, dynamic>> testMultiClassification(
     }
 
     // Train
-    final weights = logisticRegression(
-        x1, x2, tempYDesired, learningRate, maxIterations, threshold);
+    final currentWeight =
+        logisticRegression(x1, x2, tempYDesired, learningRate, maxIterations);
+
+    classWeights[c][0] = currentWeight[0];
+    classWeights[c][1] = currentWeight[1];
 
     List<int> binaryYPed = List<int>.filled(x1.length, -1);
     for (int i = 0; i < x1.length; i++) {
-      final z = calculateZ(x1[i], x2[i], weights, threshold);
+      final z = calculateZ(x1[i], x2[i]);
 
       final localYPred = stepFunction(z);
 
@@ -169,7 +196,7 @@ List<Map<String, dynamic>> testMultiClassification(
       }
     }
 
-    final equation = getEquation(weights, threshold);
+    final equation = getEquation();
 
     // Calculate confusion matrix and SSE
     final confusion = confusionMatrix(tempYDesired, binaryYPed);
@@ -204,6 +231,3 @@ List<Map<String, dynamic>> testMultiClassification(
 
   return results;
 }
-
-// allow user to add test data
-// check what is wrong with the 4th class

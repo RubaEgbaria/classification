@@ -45,7 +45,8 @@ class MutliEquationsChart extends StatelessWidget {
     Match? match = regExp.firstMatch(equation);
     if (match != null) {
       double slope = double.parse(match.group(1)!);
-      double intercept = double.parse(match.group(2)!.replaceAll(" ", ""));
+      double intercept =
+          double.parse(match.group(2)?.replaceAll(" ", "") ?? "0");
       return [intercept, slope];
     }
     return null;
@@ -91,6 +92,7 @@ class MutliEquationsChart extends StatelessWidget {
     generateYpredSpots(xValues!, yValues!, yPred);
 
     final Map<int, Color> classColors = {
+      0: Colors.lime,
       1: Colors.purple,
       2: Colors.orange,
       3: Colors.green,

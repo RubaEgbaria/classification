@@ -1,5 +1,7 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/UI/data_widget.dart';
+import 'package:flutter_application_1/UI/test_data_widget.dart';
 
 void main() {
   runApp(const MainApp());
@@ -21,7 +23,17 @@ class MainApp extends StatelessWidget {
       darkTheme: ThemeData.dark(useMaterial3: true),
       title: 'Classification App',
       home: const Scaffold(
-        body: DataWidget(),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(20),
+          dragStartBehavior: DragStartBehavior.down,
+          child: Column(
+            children: [
+              DataWidget(),
+              Divider(),
+              TestDataWidget(),
+            ],
+          ),
+        ),
       ),
     );
   }
