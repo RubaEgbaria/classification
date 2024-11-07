@@ -5,6 +5,14 @@ double calculateZ(double x1, double x2, List<double> weights, int threshold) {
 }
 
 int stepFunction(double z) {
+  // tanh
+  // return (1 / (1 + exp(-z))) > 0.5 ? 1 : 0;
+  // sigmoid
+  // return (1 / (1 + exp(-z))) > 0.5 ? 1 : 0;
+  // ReLU
+  // return z >= 0 ? 1 : 0;
+  // softmax
+  // return z >= 0 ? 1 : 0;
   return z >= 0 ? 1 : 0;
 }
 
@@ -16,7 +24,7 @@ String getEquation(List<double> weights, int threshold) {
     final slope = -weights[0] / weights[1];
     final yIntercept = -threshold / weights[1];
     final sign = yIntercept < 0 ? "-" : "+";
-    return "y = ${slope.toStringAsFixed(2)} * x $sign ${yIntercept.abs().toStringAsFixed(2)}";
+    return "y = ${slope.toStringAsFixed(2)} * x $sign ${yIntercept.toStringAsFixed(2)}";
   }
 }
 
@@ -131,6 +139,8 @@ List<Map<String, dynamic>> testMultiClassification(
       List.generate(yDesired.toSet().length, (index) => {});
   List<int> tempYDesired = [];
 
+  List<int> finalYPred = List<int>.filled(x1.length, -1);
+
   for (int c = 0; c < yDesired.toSet().length; c++) {
     // 3 or 4 num of classes more is fine as well.
     if (c != 0) {
@@ -143,19 +153,28 @@ List<Map<String, dynamic>> testMultiClassification(
     final weights = logisticRegression(
         x1, x2, tempYDesired, learningRate, maxIterations, threshold);
 
-    List<int> yPred = [];
+    List<int> binaryYPed = List<int>.filled(x1.length, -1);
     for (int i = 0; i < x1.length; i++) {
       final z = calculateZ(x1[i], x2[i], weights, threshold);
-      yPred.add(stepFunction(z));
+
+      final localYPred = stepFunction(z);
+
+      binaryYPed[i] = localYPred;
+
+      if (i == 0 && c == 0) {
+        finalYPred = binaryYPed;
+      } else if (c != 0) {
+        finalYPred[i] = localYPred == 1 ? c : finalYPred[i];
+      }
     }
 
     final equation = getEquation(weights, threshold);
 
     // Calculate confusion matrix and SSE
-    final confusion = confusionMatrix(tempYDesired, yPred);
+    final confusion = confusionMatrix(tempYDesired, binaryYPed);
 
     // SSE
-    final sse = calculateSSE(tempYDesired, yPred);
+    final sse = calculateSSE(tempYDesired, binaryYPed);
 
     // accuracy
     final accuracy =
@@ -166,6 +185,13 @@ List<Map<String, dynamic>> testMultiClassification(
     results[c]["confusionMatrix"] = confusion;
     results[c]["sse"] = sse;
     results[c]["accuracy"] = accuracy;
+    results[c]["yPred"] = finalYPred;
   }
   return results;
 }
+
+
+// add confusion matrix for multi class result
+// add SSE for multi class result
+// add accuracy for multi class result
+// allow user to add test data

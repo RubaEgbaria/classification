@@ -98,6 +98,17 @@ class ClassificationUi extends StatelessWidget {
                       .toList(),
                   xValues: x1,
                   yValues: x2,
+                  yPred: multiClassResult
+                      .map((e) {
+                        return (e['yPred'] is List<int>)
+                            ? e['yPred'] as List<int>
+                            : (e['yPred'] as List<dynamic>)
+                                .map((item) =>
+                                    int.tryParse(item.toString()) ?? 0)
+                                .toList();
+                      })
+                      .expand((e) => e)
+                      .toList(),
                 ),
               ],
             )

@@ -103,7 +103,6 @@ class LineChartSample extends StatelessWidget {
               ),
               LineChartBarData(
                 barWidth: 2,
-                isStrokeCapRound: true,
                 gradient: const LinearGradient(
                     colors: [Colors.blueGrey, Colors.lightBlueAccent]),
                 spots: spots,
@@ -114,8 +113,6 @@ class LineChartSample extends StatelessWidget {
                 barWidth: 0,
               ),
             ],
-            minY: minSpotY,
-            maxY: maxSpotY,
             titlesData: const FlTitlesData(
               leftTitles: AxisTitles(
                 sideTitles: SideTitles(

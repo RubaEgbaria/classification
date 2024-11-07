@@ -1,5 +1,4 @@
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
@@ -7,15 +6,15 @@ class MutliEquationsChart extends StatelessWidget {
   final List<String> equations;
   final List<double>? xValues;
   final List<double>? yValues;
+  final List<int> yPred;
 
   MutliEquationsChart({
     super.key,
     required this.equations,
     this.xValues,
     this.yValues,
+    required this.yPred,
   }) {
-    scatterSpots = generateScatterSpots(xValues, yValues);
-
     minSpotX = xValues != null ? xValues!.reduce((a, b) => a < b ? a : b) : 0;
     maxSpotX = xValues != null ? xValues!.reduce((a, b) => a > b ? a : b) : 0;
     minSpotY = yValues != null ? yValues!.reduce((a, b) => a < b ? a : b) : 0;
@@ -38,6 +37,7 @@ class MutliEquationsChart extends StatelessWidget {
   late double minSpotY;
   late double maxSpotY;
   final List<List<FlSpot>> equationSpots = [];
+  Map<int, List<FlSpot>> yPredSpots = {};
 
   List<double>? parseEquation(String equation) {
     // Example: "y = -0.01 * x + 0.5"
@@ -73,8 +73,34 @@ class MutliEquationsChart extends StatelessWidget {
         xValues.length, (index) => FlSpot(xValues[index], yValues[index]));
   }
 
+  void generateYpredSpots(List<double> x1, List<double> x2, List<int> yPred) {
+    Map<int, List<FlSpot>> classSpotsMap = {};
+
+    for (int i = 0; i < x1.length; i++) {
+      classSpotsMap.update(
+        yPred[i],
+        (value) => value..add(FlSpot(x1[i], x2[i])),
+        ifAbsent: () => [FlSpot(x1[i], x2[i])],
+      );
+    }
+    yPredSpots = classSpotsMap;
+
+    print("yPredSpots: $yPredSpots");
+  }
+
   @override
   Widget build(BuildContext context) {
+    generateYpredSpots(xValues!, yValues!, yPred);
+
+    print("y pred: $yPred");
+
+    final Map<int, Color> classColors = {
+      1: Colors.purple,
+      2: Colors.orange,
+      3: Colors.green,
+      4: Colors.red
+    };
+
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: AspectRatio(
@@ -82,18 +108,18 @@ class MutliEquationsChart extends StatelessWidget {
         child: LineChart(
           LineChartData(
             lineBarsData: [
-              LineChartBarData(
-                spots: scatterSpots,
-                color: Colors.red,
-                barWidth: 0,
-                dotData: const FlDotData(show: true),
-              ),
+              for (final spots in yPredSpots.entries)
+                LineChartBarData(
+                  spots: spots.value,
+                  isCurved: false,
+                  isStrokeJoinRound: true,
+                  color: classColors[spots.key],
+                  barWidth: 0,
+                ),
               for (final spots in equationSpots)
                 LineChartBarData(
                   spots: spots,
-                  isCurved: true,
-                  isStrokeJoinRound: true,
-                  color: CupertinoColors.activeBlue,
+                  color: Colors.blue,
                   barWidth: 2,
                 ),
             ],
